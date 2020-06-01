@@ -19,7 +19,7 @@ namespace NorthWinds_Final_Project
 
             try
             {
-
+                var database = new NwContext();
                 bool exit = false;
 
                 do
@@ -33,7 +33,6 @@ namespace NorthWinds_Final_Project
                         case 1: //products
                             var userProductsChoice = DisplayProductSubMenu1();
                             nLogger.Info($"User Choice On Product SubMenu 1: {userProductsChoice} @ {DateTime.Now}");
-                            var database = new NwContext();
 
                             switch (userProductsChoice)
                             {
@@ -45,8 +44,7 @@ namespace NorthWinds_Final_Project
                                     break;
                                 case 3: //Display All
                                     var userProductDisplayChoice = DisplayProductSubMenu2();
-                                    nLogger.Info(
-                                        $"User Choice On Product SubMenu 2: {userProductDisplayChoice} @ {DateTime.Now}");
+                                    nLogger.Info($"User Choice On Product SubMenu 2: {userProductDisplayChoice} @ {DateTime.Now}");
 
                                     switch (userProductDisplayChoice)
                                     {
@@ -76,6 +74,31 @@ namespace NorthWinds_Final_Project
 
                             break;
                         case 2: //categories
+                            var userInputCategories = DisplayCategorySubMenu();
+
+                            switch (userInputCategories)
+                            {
+                                case 1://Add
+                                    database.AddOrUpdateCategory(database.GetCategoryInfo());
+                                    break;
+                                case 2://Edit
+                                    database.AddOrUpdateCategory(database.GetEditedCategoryInfo());
+                                    break;
+                                case 3://Display All
+                                    database.DisplayAllCategories();
+                                    break;
+                                case 4://Display All And Their Products
+                                    database.DisplayAllCategoriesAndProducts();
+                                    break;
+                                case 5://Display A Category And Its Products
+                                    database.DisplayACategoryAndProducts();
+                                    break;
+                                case 6://Delete A Category And Its Products
+                                    database.DeleteCategoryAndProducts();
+                                    break;
+                                case 0:
+                                    break;
+                            }
                             break;
                         case 0: //quit
                             exit = true;
@@ -136,6 +159,22 @@ namespace NorthWinds_Final_Project
             Int32.TryParse(Console.ReadLine(), out var userSubMenuChoice2);
             Console.Clear();
             return userSubMenuChoice2;
+        }
+
+        public static int DisplayCategorySubMenu()
+        {
+            Console.Write("Please Choose What Operation To Perform" +
+                          "\n1. Add New Category" +
+                          "\n2. Edit A Category" +
+                          "\n3. Display All Categories" +
+                          "\n4. Display All Categories and Their Products" +
+                          "\n5. Display A Category and Its Products" +
+                          "\n6. Delete A Category and Its Products" +
+                          "\nOr Press Enter To Return To Main Menu" +
+                          "\n\nEnter Number Here--> ");
+            Int32.TryParse(Console.ReadLine(), out var userMenuChoice);
+            Console.Clear();
+            return userMenuChoice;
         }
 
     }

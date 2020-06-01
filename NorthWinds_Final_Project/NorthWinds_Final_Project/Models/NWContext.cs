@@ -1,10 +1,20 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Entity;
+using System.Data.Entity.Core;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Migrations;
+using System.Data.SqlClient;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using System.ServiceModel.Syndication;
+using Microsoft.AspNetCore.Mvc;
 using NorthWinds_Final_Project.Migrations;
+
+
 
 
 namespace NorthWinds_Final_Project.Models
@@ -31,10 +41,24 @@ namespace NorthWinds_Final_Project.Models
 
             var database = new NwContext();
             Product newProduct = new Product();
-
-            Console.Write("Enter Product Name--> ");
-            newProduct.ProductName = Console.ReadLine();
+            var exit = 0;
+            do
+            { 
+                Console.Write("Enter Product Name--> ");
+                var potentialName = Console.ReadLine();
+                var productNameSearch = database.Products.Where(p => p.ProductName == potentialName);
+                if ((productNameSearch.Any() == true))
+                {
+                    nLogger.Error("User Entered A Product Name That Already Exists");
+                }
+                else
+                {
+                    newProduct.ProductName = potentialName;
+                    exit = 1;
+                }
+            } while(exit == 0);
             Console.Clear();
+            
 
             Console.Write("Enter Quantity Per Unit--> ");
             newProduct.QuantityPerUnit = Console.ReadLine();
@@ -81,9 +105,10 @@ namespace NorthWinds_Final_Project.Models
             }
             var enteredCategory = new Category();
             var categoryList = database.Categories.OrderBy(c => c.CategoryName);
+            Console.WriteLine($"{"Name:",-20}{"CategoryID:"}\n{"-----",-20}{"-----------"}");
             foreach (var category in categoryList)
             {
-                Console.WriteLine($"{"Name:",-7}{category.CategoryName,-15}{"CategoryID:",-13}{category.CategoryId,-15}");
+                Console.WriteLine($"{category.CategoryName,-20}{category.CategoryId}");
             }
 
             Console.Write("\n\nPlease Select A Category From The List" +
@@ -123,17 +148,19 @@ namespace NorthWinds_Final_Project.Models
                     newProduct.CategoryId = c.CategoryId;
                 }
 
-                Console.WriteLine($"The Category ID Is: {newProduct.CategoryId}"); 
+                Console.WriteLine($"The Category ID Is: {newProduct.CategoryId}\nPress Any Key To Continue");
+                Console.ReadKey();
                 Console.Clear();
             }
 
             var enteredSupplier = new Supplier();
             var SupplierList = database.Suppliers.OrderBy(s => s.CompanyName);
+            Console.WriteLine($"{"Name:",-40}{"SupplierID:"}{"-----",-40}{"-----------"}");
             foreach (var supplier in SupplierList)
             {
-                Console.WriteLine($"{"Supplier Name:",-17}{supplier.CompanyName,-10}");
+                Console.WriteLine($"\n{supplier.CompanyName,-40}{supplier.SupplierId}");
             }
-            
+
             Console.Write("\n\nPlease Select A Supplier From The List Above" +
                           "\nIf A New Supplier Is Needed, Enter A Name Not On The List, And The Supplier Creation Operation Will Begin" +
                           "\nEnter Name Here--> ");
@@ -147,37 +174,62 @@ namespace NorthWinds_Final_Project.Models
                 Console.Write("\nEnter the Supplier Contact Name[Required]--> ");
                 enteredSupplier.ContactName = Console.ReadLine();
                 Console.Clear();
+                    
 
-                Console.Write("Enter the Supplier Contact Title[Required]--> ");
-                enteredSupplier.ContactTitle = Console.ReadLine();
+                Console.Write("Enter the Supplier Contact Title[Not Required]--> ");
+                if (Console.ReadLine() == "")
+                {}
+                else 
+                    enteredSupplier.ContactTitle = Console.ReadLine();
                 Console.Clear();
 
-                Console.Write("Enter the Supplier Address[Required]--> ");
-                enteredSupplier.Address = Console.ReadLine();
+                Console.Write("Enter the Supplier Address[Not Required]--> ");
+                if (Console.ReadLine() == "")
+                { }
+                else
+                    enteredSupplier.Address = Console.ReadLine();
                 Console.Clear();
 
-                Console.Write("Enter the Supplier City[Required]--> ");
-                enteredSupplier.City = Console.ReadLine();
+                Console.Write("Enter the Supplier City[Not Required]--> ");
+                if (Console.ReadLine() == "")
+                { }
+                else
+                    enteredSupplier.City = Console.ReadLine();
                 Console.Clear();
 
-                Console.Write("Enter the Supplier Region[Required]--> ");
-                enteredSupplier.Region = Console.ReadLine();
+                Console.Write("Enter the Supplier Region[Not Required]--> ");
+                if (Console.ReadLine() == "")
+                { }
+                else
+                    enteredSupplier.Region = Console.ReadLine();
                 Console.Clear();
 
-                Console.Write("Enter the Supplier Postal Code[Required]--> ");
-                enteredSupplier.PostalCode = Console.ReadLine();
+                Console.Write("Enter the Supplier Postal Code[Not Required]--> ");
+                if (Console.ReadLine() == "")
+                { }
+                else
+                    enteredSupplier.PostalCode = Console.ReadLine();
                 Console.Clear();
 
-                Console.Write("Enter the Supplier Country[Required]--> ");
-                enteredSupplier.Country = Console.ReadLine();
+                Console.Write("Enter the Supplier Country[Not Required]--> ");
+                if (Console.ReadLine() == "")
+                { }
+                else
+                    enteredSupplier.Country = Console.ReadLine();
                 Console.Clear();
 
-                Console.Write("Enter the Supplier Phone Number[Required]--> ");
-                enteredSupplier.Phone = Console.ReadLine();
+                Console.Write("Enter the Supplier Phone Number[Not Required]--> ");
+                if (Console.ReadLine() == "")
+                { }
+                else
+                    enteredSupplier.Phone = Console.ReadLine();
                 Console.Clear();
 
-                Console.Write("Enter the Supplier Fax Number[Required]--> ");
-                enteredSupplier.Fax = Console.ReadLine();
+                Console.Write("Enter the Supplier Fax Number[Not Required]--> ");
+                if (Console.ReadLine() == "")
+                { }
+                else
+                    enteredSupplier.Fax = Console.ReadLine();
                 Console.Clear();
 
                 ValidationContext context = new ValidationContext(enteredSupplier, null, null);
@@ -185,14 +237,15 @@ namespace NorthWinds_Final_Project.Models
                 var notValid = Validator.TryValidateObject(enteredSupplier, context, results, true);
                 database.Suppliers.Add(enteredSupplier);
                 database.SaveChanges();
-                nLogger.Info($"New Supplier: { enteredSupplier.CompanyName} Has Been Validated And Added To The Database.");
+                nLogger.Info($"New Supplier: {enteredSupplier.CompanyName} Has Been Validated And Added To The Database.");
 
                 var supplier = database.Suppliers.Where(s => s.CompanyName == enteredSupplier.CompanyName);
                 foreach (var s in supplier)
                 {
                     newProduct.SupplierId = s.SupplierId;
                 }
-                Console.WriteLine($"The Supplier ID Is: {newProduct.SupplierId}");
+                Console.WriteLine($"The Supplier ID Is: {newProduct.SupplierId}\nPress Any Key To Continue");
+                Console.ReadKey();
                 Console.Clear();
 
             }
@@ -204,7 +257,8 @@ namespace NorthWinds_Final_Project.Models
                 {
                     newProduct.SupplierId = s.SupplierId;
                 }
-                Console.WriteLine($"The Supplier ID Is: {newProduct.SupplierId}");
+                Console.WriteLine($"The Supplier ID Is: {newProduct.SupplierId}\nPress Any Key To Continue");
+                Console.ReadKey();
                 Console.Clear();
             }
 
@@ -215,22 +269,33 @@ namespace NorthWinds_Final_Project.Models
         public void AddOrUpdateProductToDatabase(Product product)
         {
 
-            ValidationContext context = new ValidationContext(product, null, null);
-            List<ValidationResult> results = new List<ValidationResult>();
-            var isValid = Validator.TryValidateObject(product, context, results, true);
-            if(isValid)
+
+            try
             {
-                var database = new NwContext();
-                database.Products.AddOrUpdate(product);
-                database.SaveChanges();
-                nLogger.Info($"New or Updated Product: {product} Vaildated And Added To The Database @ {DateTime.Now}");
-            }
-            else
-            {
-                foreach (var result in results)
+                ValidationContext context = new ValidationContext(product, null, null);
+                List<ValidationResult> results = new List<ValidationResult>();
+                var isValid = Validator.TryValidateObject(product, context, results, true);
+                if (isValid == true)
                 {
-                    nLogger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
+                    var database = new NwContext();
+                    database.Products.AddOrUpdate(product);
+                    database.SaveChanges();
+                    nLogger.Info($"New or Updated Product: {product} Vaildated And Added To The Database @ {DateTime.Now}");
+                    Console.WriteLine("Press Any Key To Continue");
+                    Console.ReadKey();
                 }
+                else
+                {
+                    foreach (var result in results)
+                    {
+                        nLogger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
             }
 
 
@@ -246,13 +311,22 @@ namespace NorthWinds_Final_Project.Models
                           "\nEnter Name Here--> ");
             productToEdit.ProductName = Console.ReadLine();
             var productSearch = database.Products.Any(p => p.ProductName == productToEdit.ProductName);
-            if (productSearch == false)
+            while (productSearch == false) 
             {
+                
                 nLogger.Error("User Searched For Product That Does Not Exist In Database");
+                Console.WriteLine("Press Any Key To Continue");
+                Console.ReadKey();
+                Console.Clear();
+                database.DisplayAllProducts();
+
+                Console.Write("\n\nPlease Select A Product From The List By Name" +
+                              "\nEnter Name Here--> ");
+                productToEdit.ProductName = Console.ReadLine();
+                productSearch = database.Products.Any(p => p.ProductName == productToEdit.ProductName);
             }
-            else
-            {
-                var editedProductList = database.Products.Where(p => p.ProductName == productToEdit.ProductName);
+
+            var editedProductList = database.Products.Where(p => p.ProductName == productToEdit.ProductName);
                 Console.Clear();
                 foreach (var p in editedProductList)
                 {
@@ -294,8 +368,8 @@ namespace NorthWinds_Final_Project.Models
                               "\n6.  Units In Stock" +
                               "\n7.  Reorder Level" +
                               "\n8.  Discontinued Status" +
-                              "\n9.  CategoryID" +
-                              "\n10. SupplierID" +
+                              "\n9.  SupplierID" +
+                              "\n10. CategoryID" +
                               "\n11. Edit All Columns" +
                               "\nEnter Number Here--> ");
                 Int32.TryParse(Console.ReadLine(), out var editColumnChoice);
@@ -305,10 +379,24 @@ namespace NorthWinds_Final_Project.Models
                 {
                     case 1:
                         nLogger.Info($"User Choice:{editColumnChoice} Editing Product Name");
-                        Console.Write($"Old Value: {productToEdit.ProductName}" +
-                                      $"\nEnter New Value: ");
-                        productToEdit.ProductName = Console.ReadLine();
-                        break;
+                        var exit111 = 0;
+                        do
+                        {
+                            Console.Write($"Old Value: {productToEdit.ProductName}" +
+                                          $"\nEnter New Value: ");
+                        var potentialName = Console.ReadLine();
+                            var productNameSearch = database.Products.Where(p => p.ProductName == potentialName);
+                            if ((productNameSearch.Any() == true))
+                            {
+                                nLogger.Error("User Entered A Product Name That Already Exists");
+                            }
+                            else
+                            {
+                                productToEdit.ProductName = potentialName;
+                                exit111 = 1;
+                            }
+                        } while (exit111 == 0);
+                    break;
                     case 2:
                         nLogger.Info($"User Choice:{editColumnChoice} Editing Unit Price");
                         Console.Write($"Old Value: {productToEdit.UnitPrice}" +
@@ -359,34 +447,85 @@ namespace NorthWinds_Final_Project.Models
                         break;
                     case 9:
                         nLogger.Info($"User Choice:{editColumnChoice} Editing SupplierID");
+                        var exit = 0;
+                    do
+                    {
                         var SupplierList = database.Suppliers.OrderBy(s => s.CompanyName);
+                        Console.WriteLine($"{"Name:",-40}{"SupplierID:"}\n{"-----",-40}{"-----------"}");
                         foreach (var supplier in SupplierList)
                         {
-                            Console.WriteLine($"{"Name:",-10}{supplier.CompanyName,-10}");
+                            Console.WriteLine($"\n{supplier.CompanyName,-40}{supplier.SupplierId}");
                         }
                         Console.Write($"\n\nOld Value: {productToEdit.SupplierId}" +
-                                      $"\nEnter New Value From List Above: ");
+                                          $"\nEnter New Value From List Above: ");
                         Int32.TryParse(Console.ReadLine(), out var newSupplierId);
-                        productToEdit.SupplierId = newSupplierId;
+                        if (database.Suppliers.Any(s => s.SupplierId == newSupplierId) == true)
+                        {
+                            productToEdit.SupplierId = newSupplierId;
+                            Console.WriteLine($"SupplierID is set to:{productToEdit.SupplierId}\nPress Any Key To Continue");
+                            Console.ReadKey();
+                            exit = 1;
+                        }
+                        else
+                        {
+                            nLogger.Error("User Selected SupplierID Not In DataBase");
+                            Console.WriteLine("Press Any Key To Continue");
+                            Console.ReadKey();
+                            Console.Clear();
+                        }
+                    } while (exit == 0);
                         break;
                     case 10:
                         nLogger.Info($"User Choice:{editColumnChoice} Editing CategoryID");
+                        var exit1 = 0;
+                    do
+                    {
                         var categoryList = database.Categories.OrderBy(c => c.CategoryName);
+                        Console.WriteLine($"{"Name:",-20}{"CategoryID:"}\n{"-----",-20}{"-----------"}");
                         foreach (var category in categoryList)
                         {
-                            Console.WriteLine($"{"Name:",-7}{category.CategoryName,-15}{"CategoryID:",-13}{category.CategoryId,-15}");
+                            Console.WriteLine($"{category.CategoryName,-20}{category.CategoryId}");
                         }
                         Console.Write($"\n\nOld Value: {productToEdit.CategoryId}" +
                                       $"\nEnter New Value From List Above: ");
                         Int32.TryParse(Console.ReadLine(), out var newCategoryId);
-                        productToEdit.CategoryId = newCategoryId;
+                        if (database.Categories.Any(c => c.CategoryId == newCategoryId) == true)
+                        {
+                            productToEdit.CategoryId = newCategoryId;
+                            Console.WriteLine($"CatergoryID Is Set To:{productToEdit.CategoryId}\nPress Any Key To Continue");
+                            Console.ReadKey();
+                            exit1 = 1;
+                        }
+                        else
+                        {
+                            nLogger.Error("User Selected CategoryID Not In DataBase");
+                            Console.WriteLine("Press Any Key To Continue");
+                            Console.ReadKey();
+                            Console.Clear();
+                        }
+                    } while (exit1 == 0); 
                         break;
                     case 11:
                         nLogger.Info($"User Choice:{editColumnChoice} Editing All Columns");
-                        Console.Write($"Old Value: {productToEdit.ProductName}" +
-                                      $"\nEnter New Value: ");
-                        productToEdit.ProductName = Console.ReadLine();
-                        Console.Clear();
+
+                        var exit15 = 0;
+                        do
+                        {
+                            Console.Write($"Old Value: {productToEdit.ProductName}" +
+                                          $"\nEnter New Value: ");
+                            var potentialName = Console.ReadLine();
+                            var productNameSearch = database.Products.Where(p => p.ProductName == potentialName);
+                            if ((productNameSearch.Any() == true))
+                            {
+                                nLogger.Error("User Entered A Product Name That Already Exists");
+                            }
+                            else
+                            {
+                                productToEdit.ProductName = potentialName;
+                                exit15 = 1;
+                            }
+                        } while (exit15 == 0);
+                    Console.Clear();
                         Console.Write($"Old Value: {productToEdit.UnitPrice}" +
                                       $"\nEnter New Value: ");
                         decimal.TryParse(Console.ReadLine(), out var newUnitPrice11);
@@ -421,29 +560,67 @@ namespace NorthWinds_Final_Project.Models
                         bool.TryParse(Console.ReadLine(), out var newDiscontinuedStatus11);
                         productToEdit.Discontinued = newDiscontinuedStatus11;
                         Console.Clear();
-                        var SupplierList11 = database.Suppliers.OrderBy(s => s.CompanyName);
-                        foreach (var supplier in SupplierList11)
+                        var exit11 = 0;
+                        do
                         {
-                            Console.WriteLine($"{"Name:",-10}{supplier.CompanyName,-20}{"SupplierID:",-15}{supplier.SupplierId,-10}");
-                        }
-                        Console.Write($"\n\nOld Value: {productToEdit.SupplierId}" +
-                                      $"\nEnter New Value From List Above: ");
-                        Int32.TryParse(Console.ReadLine(), out var newSupplierId11);
-                        productToEdit.SupplierId = newSupplierId11;
-                        Console.Clear();
-                        var categoryList11 = database.Categories.OrderBy(c => c.CategoryName);
-                        foreach (var category in categoryList11)
+                            var SupplierList = database.Suppliers.OrderBy(s => s.CompanyName);
+                            Console.WriteLine($"{"Name:",-40}{"SupplierID:"}{"-----",-40}{"-----------"}");
+                            foreach (var supplier in SupplierList)
+                            {
+                                Console.WriteLine($"\n{supplier.CompanyName,-40}{supplier.SupplierId}");
+                            }
+                            Console.Write($"\n\nOld Value: {productToEdit.SupplierId}" +
+                                          $"\nEnter New Value From List Above: ");
+                            Int32.TryParse(Console.ReadLine(), out var newSupplierId);
+                            if (database.Suppliers.Any(s => s.SupplierId == newSupplierId) == true)
+                            {
+                                productToEdit.SupplierId = newSupplierId;
+                                Console.WriteLine($"SupplierID is set to:{productToEdit.SupplierId}\nPress Any Key To Continue");
+                                Console.ReadKey();
+                                exit11 = 1;
+                            }
+                            else
+                            {
+                                nLogger.Error("User Selected SupplierID Not In DataBase");
+                                Console.WriteLine("Press Any Key To Continue");
+                                Console.ReadKey();
+                                Console.Clear();
+                            }
+                        } while (exit11 == 0);
+                    Console.Clear();
+                        var exit12 = 0;
+                        do
                         {
-                            Console.WriteLine($"{"Name:",-7}{category.CategoryName,-15}{"CategoryID:",-13}{category.CategoryId,-15}");
-                        }
-                        Console.Write($"\n\nOld Value: {productToEdit.CategoryId}" +
-                                      $"\nEnter New Value From List Above: ");
-                        Int32.TryParse(Console.ReadLine(), out var newCategoryId11);
-                        productToEdit.CategoryId = newCategoryId11;
-                        break;
+                            var categoryList = database.Categories.OrderBy(c => c.CategoryName);
+                            Console.WriteLine($"{"Name:",-20}{"CategoryID:"}\n{"-----",-20}{"-----------"}");
+                            foreach (var category in categoryList)
+                            {
+                                Console.WriteLine($"{category.CategoryName,-20}{category.CategoryId}");
+                            }
+                            Console.Write($"\n\nOld Value: {productToEdit.CategoryId}" +
+                                          $"\nEnter New Value From List Above: ");
+                            Int32.TryParse(Console.ReadLine(), out var newCategoryId);
+                            if (database.Categories.Any(c => c.CategoryId == newCategoryId) == true)
+                            {
+                                productToEdit.CategoryId = newCategoryId;
+                                Console.WriteLine($"CatergoryID Is Set To:{productToEdit.CategoryId}\nPress Any Key To Continue");
+                                Console.ReadKey();
+                                exit12 = 1;
+                            }
+                            else
+                            {
+                                nLogger.Error("User Selected CategoryID Not In DataBase");
+                                Console.WriteLine("Press Any Key To Continue");
+                                Console.ReadKey();
+                                Console.Clear();
+                            }
+                    } while (exit12 == 0);
+                    break;
                 }
-            }
+            
 
+            Console.WriteLine("Press Any Key To Return To Main Menu");
+            Console.ReadKey();
             Console.Clear();
             return productToEdit;
         }
@@ -464,6 +641,9 @@ namespace NorthWinds_Final_Project.Models
                     
                 
             }
+
+            Console.WriteLine("Press Any Key To Continue");
+            Console.ReadKey();
         }
 
         public void DisplayActiveProducts()
@@ -479,6 +659,8 @@ namespace NorthWinds_Final_Project.Models
                     Console.WriteLine($"Product ID: {product.ProductID,-20}Product Name: {product.ProductName,-32}   ACTIVE\n");
   
             }
+            Console.WriteLine("Press Any Key To Continue");
+            Console.ReadKey();
         }
 
         public void DisplayDiscontinuedProducts()
@@ -492,6 +674,8 @@ namespace NorthWinds_Final_Project.Models
                 if(product.Discontinued == true)
                     Console.WriteLine($"Product ID: {product.ProductID,-20}Product Name: {product.ProductName,-32}   DISCONTINUED\n");
             }
+            Console.WriteLine("Press Any Key To Continue");
+            Console.ReadKey();
         }
 
         public void DisplayAllColumnsForSelectedProduct()
@@ -567,6 +751,250 @@ namespace NorthWinds_Final_Project.Models
                 nLogger.Error("User Entered ProductID Not In Database");
             }
 
+        }
+
+        public void DisplayAllCategories()
+        {
+            var database = new NwContext();
+            var categoryList = database.Categories.OrderBy(c => c.CategoryName);
+            Console.WriteLine($"{"Name:",-20}{"Category Description:"}\n{"-----",-20}{"---------------------"}");
+            foreach (var category in categoryList)
+            {
+                Console.WriteLine($"{category.CategoryName,-20}{category.Description}");
+            }
+
+            Console.WriteLine("Press Any Key To Continue");
+            Console.ReadKey();
+
+        }
+
+        public void DisplayAllCategoriesAndProducts()
+        {
+            var database = new NwContext();
+            var productList = database.Products.OrderBy(p => p.ProductID);
+            List<Product> productName = new List<Product>();
+            foreach (var p in productList)
+            {
+                productName.Add(p);
+            }
+            var categoryList = database.Categories.OrderBy(c => c.CategoryId);
+            List<Category> categories = new List<Category>();
+            foreach (var c in categoryList)
+            {
+                categories.Add(c);
+            }
+            foreach(var c in categories)
+            {
+                Console.WriteLine($"\n\n{"Category Name:",-15}\n{"--------------"}\n{c.CategoryName}\n");
+                Console.WriteLine($"    {"Product Name:",-20}\n    {"-------------"}");
+                foreach (var p in productName)
+                {
+                    if (c.CategoryId == p.CategoryId)
+                    {
+                        Console.WriteLine($"    {p.ProductName}");
+                    }
+                }
+
+            }
+
+            Console.WriteLine("Press Any Key To Continue");
+            Console.ReadKey();
+
+        }
+
+        public void DisplayACategoryAndProducts()
+        {
+            var database = new NwContext();
+            var enteredCategory = new Category();
+            var categoryList = database.Categories.OrderBy(c => c.CategoryName);
+            Console.WriteLine($"{"Name:",-20}{"CategoryID:"}\n{"-----",-20}{"-----------"}");
+            foreach (var category in categoryList)
+            {
+                Console.WriteLine($"{category.CategoryName,-20}{category.CategoryId}");
+            }
+
+            Console.Write("\n\nPlease Select A Category From The List" +
+                          "\nEnter Name Here--> ");
+            enteredCategory.CategoryName = Console.ReadLine();
+            var categorySearch = database.Categories.Where(c => c.CategoryName == enteredCategory.CategoryName);
+            var productList = database.Products.OrderBy(p1 => p1.ProductID);
+            List<Product> productName = new List<Product>();
+            foreach (var p in productList)
+            {
+                productName.Add(p);
+            }
+            List<Category> categories = new List<Category>();
+            foreach (var c in categorySearch)
+            {
+             categories.Add(c);   
+            }
+            foreach (var c in categories)
+            {
+                Console.WriteLine($"\n\n{"Category Name:",-15}\n{"--------------"}\n{c.CategoryName}\n");
+                Console.WriteLine($"    {"Product Name:",-20}\n    {"-------------"}");
+                foreach (var p in productName)
+                {
+                    if (c.CategoryId == p.CategoryId)
+                    {
+                        Console.WriteLine($"    {p.ProductName}");
+                    }
+                }
+
+            }
+            Console.WriteLine("Press Any Key To Continue");
+            Console.ReadKey();
+
+
+        }
+
+        public void DeleteCategoryAndProducts()
+        {
+            var database = new NwContext();
+            var enteredCategory = new Category();
+            var categoryList = database.Categories.OrderBy(c => c.CategoryName);
+            Console.WriteLine($"{"Name:",-20}{"CategoryID:"}\n{"-----",-20}{"-----------"}");
+            foreach (var category in categoryList)
+            {
+                Console.WriteLine($"{category.CategoryName,-20}{category.CategoryId}");
+            }
+
+            Console.Write("\n\nPlease Select A Category From The List" +
+                          "\nEnter Name Here--> ");
+            enteredCategory.CategoryName = Console.ReadLine();
+            var categorySearch = database.Categories.Where(c => c.CategoryName == enteredCategory.CategoryName);
+            var productList = database.Products.OrderBy(p1 => p1.ProductID);
+            List<Product> productName = new List<Product>();
+            foreach (var p in productList)
+            {
+                productName.Add(p);
+            }
+            List<Category> categories = new List<Category>();
+            foreach (var c in categorySearch)
+            {
+                categories.Add(c);
+            }
+            foreach (var c in categories)
+            {
+                Console.WriteLine($"\n\n{"Category Name:",-15}\n{"--------------"}\n{c.CategoryName}\n");
+                Console.WriteLine($"    {"Product Name:",-20}\n    {"-------------"}");
+                foreach (var p in productName)
+                {
+                    if (c.CategoryId == p.CategoryId)
+                    {
+                        Console.WriteLine($"    {p.ProductName}");
+                    }
+                }
+                Console.Write("The Category And Its Products Will Be Deleted\nAre You Sure?\n1. Yes\n2. No\nEnter Choice Here--> ");
+                Int32.TryParse(Console.ReadLine(), out var deletionChoice);
+                if (deletionChoice == 1)
+                {
+                    foreach (var p in productName)
+                    {
+                        if (c.CategoryId == p.CategoryId)
+                        {
+                            database.Products.Remove(p);
+                        }
+                    }
+
+                    database.Categories.Remove(c);
+                    database.SaveChanges();
+                    nLogger.Info($"User Removed{c.CategoryName} And All Its Products From The Database");
+                    Console.WriteLine("Press Any Key To Continue");
+                    Console.ReadKey();
+                }
+
+
+            }
+
+
+        }
+
+        public Category GetCategoryInfo()
+        {
+            var database = new NwContext();
+            var newCategory = new Category();
+            var exit = 0;
+            do
+            {
+
+                Console.Write("\n\nPlease Choose A Name For The New Category" +
+                              "\nEnter Name Here--> ");
+                newCategory.CategoryName = Console.ReadLine();
+                var categorySearch = database.Categories.Any(c => c.CategoryName == newCategory.CategoryName);
+                if (categorySearch == false)
+                {
+                    Console.WriteLine($"\nA New Category Will Be Created Named: {newCategory.CategoryName}");
+                    Console.Write("Enter the Category Description[Required]--> ");
+                    newCategory.Description = Console.ReadLine();
+                    Console.Clear();
+                    exit = 1;
+                }
+                else
+                {
+                    nLogger.Error("User Entered Category That Already Exists");
+                    Console.WriteLine("Press Any Key To Continue");
+                } 
+            } while (exit == 0);
+
+            return newCategory;
+        }
+
+        public Category GetEditedCategoryInfo()
+        {
+            var database = new NwContext();
+            var editedCategory = new Category();
+            var exit = 0;
+            do
+            {
+
+                Console.Write("\n\nPlease Choose A Name For The Category To Be Edited" +
+                              "\nEnter Name Here--> ");
+                editedCategory.CategoryName = Console.ReadLine();
+                var categorySearch = database.Categories.Where(c => c.CategoryName == editedCategory.CategoryName);
+                
+                if (categorySearch.Any() == true )
+                {
+                    foreach (var c in categorySearch)
+                    {
+                        editedCategory.CategoryId = c.CategoryId;
+                    }
+                    Console.WriteLine($"\nThe Category To Be Edited: {editedCategory.CategoryName}");
+                    Console.Write("Enter the Category Description[Required]--> ");
+                    editedCategory.Description = Console.ReadLine();
+                    Console.Clear();
+                    exit = 1;
+                }
+                else
+                {
+                    nLogger.Error("User Entered Category That Already Exists");
+                    Console.WriteLine("Press Any Key To Continue");
+                }
+            } while (exit == 0);
+
+            return editedCategory;
+        }
+
+        public void AddOrUpdateCategory(Category newCategory)
+        {
+            var database = new NwContext();
+            ValidationContext context = new ValidationContext(newCategory, null, null);
+            List<ValidationResult> results = new List<ValidationResult>();
+            var notValid = Validator.TryValidateObject(newCategory, context, results, true);
+            if (notValid == true)
+            {
+                database.Categories.AddOrUpdate(newCategory);
+                database.SaveChanges();
+                nLogger.Info($"New or Updated Category: {newCategory} Vaildated And Added To The Database @ {DateTime.Now}");
+                Console.WriteLine("Press Any Key To Continue");
+                Console.ReadKey();
+            }
+            else
+            {
+                foreach (var result in results)
+                {
+                    nLogger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
+                }
+            }
         }
     }
 
