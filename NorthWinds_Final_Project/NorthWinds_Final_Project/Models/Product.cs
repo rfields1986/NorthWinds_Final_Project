@@ -16,7 +16,7 @@ namespace NorthWinds_Final_Project.Models
         [MaxLength(100)]
         [Required(ErrorMessage = "Product Name Must Be Entered. Edit Operation Canceled")]
         public string ProductName { get; set; }
-        [MaxLength(50)]
+        [MaxLength(1000)]
         public string QuantityPerUnit { get; set; }
         public decimal? UnitPrice { get; set; }
         public decimal? WholeSalePrice { get; set; }

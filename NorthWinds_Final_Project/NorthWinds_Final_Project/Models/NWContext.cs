@@ -155,7 +155,7 @@ namespace NorthWinds_Final_Project.Models
 
             var enteredSupplier = new Supplier();
             var SupplierList = database.Suppliers.OrderBy(s => s.CompanyName);
-            Console.WriteLine($"{"Name:",-40}{"SupplierID:"}{"-----",-40}{"-----------"}");
+            Console.WriteLine($"{"Name:",-40}{"SupplierID:"}\n{"-----",-40}{"-----------"}");
             foreach (var supplier in SupplierList)
             {
                 Console.WriteLine($"\n{supplier.CompanyName,-40}{supplier.SupplierId}");
@@ -507,8 +507,10 @@ namespace NorthWinds_Final_Project.Models
                         break;
                     case 11:
                         nLogger.Info($"User Choice:{editColumnChoice} Editing All Columns");
+                        nLogger.Info($"User Choice:{editColumnChoice} Editing Product Name");
 
-                        var exit15 = 0;
+
+                    var exit15 = 0;
                         do
                         {
                             Console.Write($"Old Value: {productToEdit.ProductName}" +
@@ -526,45 +528,61 @@ namespace NorthWinds_Final_Project.Models
                             }
                         } while (exit15 == 0);
                     Console.Clear();
-                        Console.Write($"Old Value: {productToEdit.UnitPrice}" +
+                        nLogger.Info($"User Choice:{editColumnChoice} Editing Unit Price");
+
+                    Console.Write($"Old Value: {productToEdit.UnitPrice}" +
                                       $"\nEnter New Value: ");
                         decimal.TryParse(Console.ReadLine(), out var newUnitPrice11);
                         productToEdit.UnitPrice = newUnitPrice11;
                         Console.Clear();
-                        Console.Write($"Old Value: {productToEdit.QuantityPerUnit}" +
+                        nLogger.Info($"User Choice:{editColumnChoice} Editing Quantity Per Unit");
+
+                    Console.Write($"Old Value: {productToEdit.QuantityPerUnit}" +
                                       $"\nEnter New Value: ");
                         productToEdit.QuantityPerUnit = Console.ReadLine();
                         Console.Clear();
-                        Console.Write($"Old Value: {productToEdit.UnitsOnOrder}" +
+                        nLogger.Info($"User Choice:{editColumnChoice} Editing Units On Order");
+
+                    Console.Write($"Old Value: {productToEdit.UnitsOnOrder}" +
                                       $"\nEnter New Value: ");
                         Int16.TryParse(Console.ReadLine(), out var newUnitsOnOrder11);
                         productToEdit.UnitsOnOrder = newUnitsOnOrder11;
                         Console.Clear();
+                        nLogger.Info($"User Choice:{editColumnChoice} Editing Wholesale Price");
+
                         Console.Write($"Old Value: {productToEdit.WholeSalePrice}" +
                                       $"\nEnter New Value: ");
                         decimal.TryParse(Console.ReadLine(), out var newWholeSalePrice11);
                         productToEdit.WholeSalePrice = newWholeSalePrice11;
                         Console.Clear();
-                        Console.Write($"Old Value: {productToEdit.UnitsInStock}" +
+                        nLogger.Info($"User Choice:{editColumnChoice} Editing Units In Stock");
+
+                    Console.Write($"Old Value: {productToEdit.UnitsInStock}" +
                                       $"\nEnter New Value: ");
                         Int16.TryParse(Console.ReadLine(), out var newUnitsInStock11);
                         productToEdit.UnitsInStock = newUnitsInStock11;
                         Console.Clear();
-                        Console.Write($"Old Value: {productToEdit.ReorderLevel}" +
+                        nLogger.Info($"User Choice:{editColumnChoice} Editing Reorder Level");
+
+                    Console.Write($"Old Value: {productToEdit.ReorderLevel}" +
                                       $"\nEnter New Value: ");
                         Int16.TryParse(Console.ReadLine(), out var newReorderLevel11);
                         productToEdit.ReorderLevel = newReorderLevel11;
                         Console.Clear();
-                        Console.Write($"Old Value: {productToEdit.Discontinued}" +
+                        nLogger.Info($"User Choice:{editColumnChoice} Editing Discontinued Status");
+
+                    Console.Write($"Old Value: {productToEdit.Discontinued}" +
                                       $"\nEnter New Value: ");
                         bool.TryParse(Console.ReadLine(), out var newDiscontinuedStatus11);
                         productToEdit.Discontinued = newDiscontinuedStatus11;
                         Console.Clear();
-                        var exit11 = 0;
+                        nLogger.Info($"User Choice:{editColumnChoice} Editing SupplierID");
+
+                    var exit11 = 0;
                         do
                         {
                             var SupplierList = database.Suppliers.OrderBy(s => s.CompanyName);
-                            Console.WriteLine($"{"Name:",-40}{"SupplierID:"}{"-----",-40}{"-----------"}");
+                            Console.WriteLine($"{"Name:",-40}{"SupplierID:"}\n{"-----",-40}{"-----------"}");
                             foreach (var supplier in SupplierList)
                             {
                                 Console.WriteLine($"\n{supplier.CompanyName,-40}{supplier.SupplierId}");
@@ -588,7 +606,9 @@ namespace NorthWinds_Final_Project.Models
                             }
                         } while (exit11 == 0);
                     Console.Clear();
-                        var exit12 = 0;
+                        nLogger.Info($"User Choice:{editColumnChoice} Editing CategoryID");
+
+                    var exit12 = 0;
                         do
                         {
                             var categoryList = database.Categories.OrderBy(c => c.CategoryName);
